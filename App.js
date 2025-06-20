@@ -1,20 +1,26 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { useEffect } from 'react';
+
+import { AppState } from 'react-native';
+import TrackPlayer from 'react-native-track-player';
+import AppNavigation from './src/navigation';
+
+const queryClient = new QueryClient();
 
 export default function App() {
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        TrackPlayer.play(); // Asegura que la radio continúe en segundo plano
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text> hOLA MIGBEN Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <QueryClientProvider client={queryClient}>
+      <AppNavigation />
+    </QueryClientProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
